@@ -17,7 +17,7 @@ debug_subject="fibocom_ctrl"
 get_mode()
 {
     local at_command="AT+GTUSBMODE?"
-    local mode_num=$(at ${at_port} ${at_command} | grep "+GTUSBMODE:" | sed 's/+GTUSBMODE: //g' | sed 's/\r//g')
+    local mode_num=$(at ${at_port} ${at_command} | grep -a "+GTUSBMODE:" | sed 's/+GTUSBMODE: //g' | sed 's/\r//g')
 
     local mode
     case "$platform" in
@@ -145,7 +145,7 @@ set_mode()
 get_network_prefer_nr()
 {
     at_command="AT+GTACT?"
-    local network_prefer_num=$(at $at_port $at_command | grep "+GTACT:" | awk -F',' '{print $1}' | sed 's/+GTACT: //g')
+    local network_prefer_num=$(at $at_port $at_command | grep -a "+GTACT:" | awk -F',' '{print $1}' | sed 's/+GTACT: //g')
     
     local network_prefer_3g="0";
     local network_prefer_4g="0";
@@ -255,7 +255,7 @@ set_network_prefer_nr()
 get_network_prefer_lte()
 {
     at_command="AT+GTACT?"
-    local network_prefer_num=$(at $at_port $at_command | grep "+GTACT:" | awk -F',' '{print $1}' | sed 's/+GTACT: //g')
+    local network_prefer_num=$(at $at_port $at_command | grep -a "+GTACT:" | awk -F',' '{print $1}' | sed 's/+GTACT: //g')
     
     local network_prefer_3g="0";
     local network_prefer_4g="0";
@@ -365,7 +365,7 @@ set_network_prefer()
 get_voltage()
 {
     at_command="AT+CBC"
-	local voltage=$(at $at_port $at_command | grep "+CBC:" | awk -F',' '{print $2}' | sed 's/\r//g')
+	local voltage=$(at $at_port $at_command | grep -a "+CBC:" | awk -F',' '{print $2}' | sed 's/\r//g')
     [ -n $voltage ] && {
         voltage="${voltage}mV"
     }
@@ -378,26 +378,26 @@ get_temperature()
 {
     #Temperature（温度）
     at_command="AT+MTSM=1,6"
-    response=$(at $at_port $at_command | grep "+MTSM: " | sed 's/+MTSM: //g' | sed 's/\r//g')
+    response=$(at $at_port $at_command | grep -a "+MTSM: " | sed 's/+MTSM: //g' | sed 's/\r//g')
 
     [ -z "$response" ] && {
         #Fx160及以后型号
         at_command="AT+GTLADC"
-	    response=$(at $at_port $at_command | grep "cpu" | awk -F' ' '{print $2}' | sed 's/\r//g')
+	    response=$(at $at_port $at_command | grep -a "cpu" | awk -F' ' '{print $2}' | sed 's/\r//g')
         response="${response:0:2}"
     }
 
     [ -z "$response" ] && {
         #联发科平台
         at_command="AT+GTSENRDTEMP=1"
-        response=$(at $at_port $at_command | grep "+GTSENRDTEMP: " | awk -F',' '{print $2}' | sed 's/\r//g')
+        response=$(at $at_port $at_command | grep -a "+GTSENRDTEMP: " | awk -F',' '{print $2}' | sed 's/\r//g')
         response="${response:0:2}"
     }
     
     [ -z "$response" ] && {
         #紫光平台
         at_command="AT+MTSM=1"
-        response=$(at $at_port $at_command | grep "+MTSM: " | sed 's/+MTSM: //g' | sed 's/\r//g')
+        response=$(at $at_port $at_command | grep -a "+MTSM: " | sed 's/+MTSM: //g' | sed 's/\r//g')
     }
 
     local temperature
@@ -417,13 +417,13 @@ base_info()
 
     #Name（名称）
     at_command="AT+CGMM?"
-    name=$(at $at_port $at_command | grep "+CGMM: " | awk -F'"' '{print $2}')
+    name=$(at $at_port $at_command | grep -a "+CGMM: " | awk -F'"' '{print $2}')
     #Manufacturer（制造商）
     at_command="AT+CGMI?"
-    manufacturer=$(at $at_port $at_command | grep "+CGMI: " | awk -F'"' '{print $2}')
+    manufacturer=$(at $at_port $at_command | grep -a "+CGMI: " | awk -F'"' '{print $2}')
     #Revision（固件版本）
     at_command="AT+CGMR?"
-    revision=$(at $at_port $at_command | grep "+CGMR: " | awk -F'"' '{print $2}')
+    revision=$(at $at_port $at_command | grep -a "+CGMR: " | awk -F'"' '{print $2}')
 
     class="Base Information"
     add_plain_info_entry "name" "$name" "Name"
@@ -446,17 +446,17 @@ sim_info()
     
     #SIM Slot（SIM卡卡槽）
     at_command="AT+GTDUALSIM?"
-	sim_slot=$(at ${at_port} ${at_command} | grep "+GTDUALSIM" | awk -F'"' '{print $2}' | sed 's/SUB//g')
+	sim_slot=$(at ${at_port} ${at_command} | grep -a "+GTDUALSIM" | awk -F'"' '{print $2}' | sed 's/SUB//g')
 
     #IMEI（国际移动设备识别码）
     at_command="AT+CGSN?"
-	imei=$(at ${at_port} ${at_command} | grep "+CGSN: " | awk -F'"' '{print $2}')
+	imei=$(at ${at_port} ${at_command} | grep -a "+CGSN: " | awk -F'"' '{print $2}')
 
     #SIM Status（SIM状态）
     at_command="AT+CPIN?"
-	sim_status_flag=$(at ${at_port} ${at_command} | grep "+CPIN: ")
+	sim_status_flag=$(at ${at_port} ${at_command} | grep -a "+CPIN: ")
     [ -z "$sim_status_flag" ] && {
-        sim_status_flag=$(at ${at_port} ${at_command} | grep "+CME")
+        sim_status_flag=$(at ${at_port} ${at_command} | grep -a "+CME")
     }
     sim_status=$(get_sim_status "$sim_status_flag")
 
@@ -466,7 +466,7 @@ sim_info()
 
     #ISP（互联网服务提供商）
     at_command="AT+COPS?"
-    isp=$(at ${at_port} ${at_command} | grep "+COPS" | awk -F'"' '{print $2}')
+    isp=$(at ${at_port} ${at_command} | grep -a "+COPS" | awk -F'"' '{print $2}')
     # if [ "$isp" = "CHN-CMCC" ] || [ "$isp" = "CMCC" ]|| [ "$isp" = "46000" ]; then
     #     isp="中国移动"
     # elif [ "$isp" = "CHN-UNICOM" ] || [ "$isp" = "UNICOM" ] || [ "$isp" = "46001" ]; then
@@ -477,23 +477,23 @@ sim_info()
 
     #SIM Number（SIM卡号码，手机号）
     at_command="AT+CNUM"
-    sim_number=$(at ${at_port} ${at_command} | grep "+CNUM: " | awk -F'"' '{print $2}')
+    sim_number=$(at ${at_port} ${at_command} | grep -a "+CNUM: " | awk -F'"' '{print $2}')
     [ -z "$sim_number" ] && {
-        sim_number=$(at ${at_port} ${at_command} | grep "+CNUM: " | awk -F'"' '{print $4}')
+        sim_number=$(at ${at_port} ${at_command} | grep -a "+CNUM: " | awk -F'"' '{print $4}')
     }
 	
     #IMSI（国际移动用户识别码）
     at_command="AT+CIMI?"
-    imsi=$(at ${at_port} ${at_command} | grep "+CIMI: " | awk -F' ' '{print $2}' | sed 's/"//g' | sed 's/\r//g')
+    imsi=$(at ${at_port} ${at_command} | grep -a "+CIMI: " | awk -F' ' '{print $2}' | sed 's/"//g' | sed 's/\r//g')
     [ -z "$sim_number" ] && {
-        imsi=$(at ${at_port} ${at_command} | grep "+CIMI: " | awk -F'"' '{print $2}')
+        imsi=$(at ${at_port} ${at_command} | grep -a "+CIMI: " | awk -F'"' '{print $2}')
     }
 
     #ICCID（集成电路卡识别码）
     at_command="AT+ICCID"
-    iccid=$(at ${at_port} ${at_command} | grep -o "+ICCID:[ ]*[-0-9]\+" | grep -o "[-0-9]\{1,4\}")
+    iccid=$(at ${at_port} ${at_command} | grep -a -o "+ICCID:[ ]*[-0-9]\+" | grep -a -o "[-0-9]\{1,4\}")
 		[ -z "$iccid" ] && {
-        iccid=$(at ${at_port} "AT+CCID" | grep -o "+CCID:[ ]*[-0-9]\+" | awk -F' ' '{print $2}')
+        iccid=$(at ${at_port} "AT+CCID" | grep -a -o "+CCID:[ ]*[-0-9]\+" | awk -F' ' '{print $2}')
     }
     class="SIM Information"
     case "$sim_status" in
@@ -526,7 +526,7 @@ sim_info()
 get_imei()
 {
     at_command="AT+CGSN?"
-    imei=$(at ${at_port} ${at_command} | grep "+CGSN: " | awk -F'"' '{print $2}'| grep -E '[0-9]+')
+    imei=$(at ${at_port} ${at_command} | grep -a "+CGSN: " | awk -F'"' '{print $2}'| grep -a -E '[0-9]+')
     json_add_string "imei" "$imei"
 }
 
@@ -566,11 +566,11 @@ network_info()
     class="Network Information"
     #Network Type（网络类型）
     at_command="AT+PSRAT?"
-    network_type=$(at ${at_port} ${at_command} | grep "+PSRAT:" | sed 's/+PSRAT: //g' | sed 's/\r//g')
+    network_type=$(at ${at_port} ${at_command} | grep -a "+PSRAT:" | sed 's/+PSRAT: //g' | sed 's/\r//g')
 
     [ -z "$network_type" ] && {
         at_command='AT+COPS?'
-        local rat_num=$(at ${at_port} ${at_command} | grep "+COPS:" | awk -F',' '{print $4}' | sed 's/\r//g')
+        local rat_num=$(at ${at_port} ${at_command} | grep -a "+COPS:" | awk -F',' '{print $4}' | sed 's/\r//g')
         network_type=$(get_rat ${rat_num})
     }
     add_plain_info_entry "Network Type" "$network_type" "Network Type"
@@ -580,7 +580,7 @@ network_info()
             #CSQ（信号强度）
             #速率统计
             at_command="AT+GTSTATIS?"
-            response=$(at $at_port $at_command | grep "+GTSTATIS:" | sed 's/+GTSTATIS: //g' | sed 's/\r//g')
+            response=$(at $at_port $at_command | grep -a "+GTSTATIS:" | sed 's/+GTSTATIS: //g' | sed 's/\r//g')
 
             #当前上传速率（单位，Byte/s）
             tx_rate=$(echo $response | awk -F',' '{print $2}')
@@ -728,8 +728,8 @@ get_lockband_lte()
     m_debug "Fibocom get lockband info lte"
     get_lockband_config_command="AT+GTACT?"
     get_available_band_command="AT+GTACT=?"
-    get_lockband_config_res=$(at $at_port $get_lockband_config_command |grep GTACT: | sed 's/\r//g')
-    get_available_band_res=$(at $at_port $get_available_band_command |grep GTACT: | sed 's/\r//g')
+    get_lockband_config_res=$(at $at_port $get_lockband_config_command |grep -a GTACT: | sed 's/\r//g')
+    get_available_band_res=$(at $at_port $get_available_band_command |grep -a GTACT: | sed 's/\r//g')
     json_add_object "UMTS"
     json_add_array "available_band"
     json_close_array
@@ -855,13 +855,13 @@ set_lockband_nr()
 
     # 获取当前band配置
     get_lockband_config_command="AT+GTACT?"
-    get_lockband_config_res=$(at $at_port $get_lockband_config_command | grep "+GTACT:" | head -n1)
+    get_lockband_config_res=$(at $at_port $get_lockband_config_command | grep -a "+GTACT:" | head -n1)
     band_params=$(echo "$get_lockband_config_res" | sed 's/+GTACT:[ ]*//' | tr -d '\r')
     prefix=$(echo "$band_params" | cut -d',' -f1-3)
     bands=$(echo "$band_params" | cut -d',' -f4- | tr -d '\r')
 
     # 获取全选band
-    get_available_band_res=$(at $at_port "AT+GTACT=?" | grep "+GTACT:" | head -n1)
+    get_available_band_res=$(at $at_port "AT+GTACT=?" | grep -a "+GTACT:" | head -n1)
     available_band_params=$(echo "$get_available_band_res" | sed 's/+GTACT:[ ]*//' | tr -d '\r')
     ALL_UMTS=$(echo "$available_band_params" | awk -F'[()]' '{print $10}' | tr -d ' ')
     ALL_LTE=$(echo "$available_band_params" | awk -F'[()]' '{print $12}' | tr -d ' ')
@@ -1019,7 +1019,7 @@ get_neighborcell()
         esac
     done < "/tmp/neighborcell"
 
-    result=`at $at_port $get_lockcell_command | grep "+GTCELLLOCK:" | sed 's/+GTCELLLOCK: //g' | sed 's/\r//g'`
+    result=`at $at_port $get_lockcell_command | grep -a "+GTCELLLOCK:" | sed 's/+GTCELLLOCK: //g' | sed 's/\r//g'`
     #$1:lockcell_status $2:cell_type $3:lock_type $4:arfcn $5:pci $6:scs $7:nr_band
     json_add_object "lockcell_status"
     if [ -n "$result" ]; then
@@ -1220,18 +1220,18 @@ cell_info()
     at_command='AT+GTCAINFO?'
     ca_response=$(at $at_port $at_command)
 
-    local rat=$(echo "$response" | grep "service" | awk -F' ' '{print $1}')
+    local rat=$(echo "$response" | grep -a "service" | awk -F' ' '{print $1}')
 
     #适配联发科平台（FM350-GL）
     [ -z "$rat" ] && {
         at_command='AT+COPS?'
-        rat_num=$(at $at_port $at_command | grep "+COPS:" | awk -F',' '{print $4}' | sed 's/\r//g')
+        rat_num=$(at $at_port $at_command | grep -a "+COPS:" | awk -F',' '{print $4}' | sed 's/\r//g')
         rat=$(get_rat ${rat_num})
     }
     
     #CSQ（信号强度）
     at_command="AT+CSQ"
-    csqinfo=$(at ${at_port} ${at_command} | grep "+CSQ:" | sed 's/+CSQ: //g' | sed 's/\r//g')
+    csqinfo=$(at ${at_port} ${at_command} | grep -a "+CSQ:" | sed 's/+CSQ: //g' | sed 's/\r//g')
     
     #RSSI（信号强度指示）
     rssi_num=$(echo $csqinfo | awk -F',' '{print $1}')
@@ -1252,7 +1252,7 @@ cell_info()
                     network_mode="NR5G-SA Mode"
                     IFS=$'\n'
                     for ca_res in $ca_response; do
-                        if echo "$ca_res" | grep -q "SCC"; then
+                        if echo "$ca_res" | grep -a -q "SCC"; then
                             ca_count=$((ca_count+1))
                             scc_ul_ca=$(echo "$ca_res" | awk -F',' '{print $2}')
                             scc_band_num=$(echo "$ca_res" | awk -F',' '{print $3}')
@@ -1305,9 +1305,9 @@ cell_info()
                     nr_physical_cell_id=$(echo "$response" | awk -F',' '{print $8}')
                     nr_band_num=$(echo "$response" | awk -F',' '{print $9}')
                     nr_band=$(get_band "NR" ${nr_band_num})
-                    nr_dl_bandwidth_num=$(echo "$ca_response" | grep "PCC" | sed 's/\r//g' | awk -F',' '{print $4}')
+                    nr_dl_bandwidth_num=$(echo "$ca_response" | grep -a "PCC" | sed 's/\r//g' | awk -F',' '{print $4}')
                     nr_dl_bandwidth=$(get_bandwidth "NR" ${nr_dl_bandwidth_num})
-                    nr_ul_bandwidth_num=$(echo "$ca_response" | grep "PCC" | sed 's/\r//g' | awk -F',' '{print $5}')
+                    nr_ul_bandwidth_num=$(echo "$ca_response" | grep -a "PCC" | sed 's/\r//g' | awk -F',' '{print $5}')
                     nr_ul_bandwidth=$(get_bandwidth "NR" ${nr_ul_bandwidth_num})
                     nr_sinr_num=$(echo "$response" | awk -F',' '{print $11}')
                     nr_sinr=$(get_sinr "NR" ${nr_sinr_num})
@@ -1373,7 +1373,7 @@ cell_info()
                     ul_bandwidth_num=$(echo "$response" | awk -F',' '{print $10}')
                     lte_ul_bandwidth=$(get_bandwidth "LTE" ${ul_bandwidth_num})
                     lte_dl_bandwidth="$lte_ul_bandwidth"
-                    lte_rssnr=$(echo "$response" | grep "," | head -n1 | awk -F',' '{print $11}')
+                    lte_rssnr=$(echo "$response" | grep -a "," | head -n1 | awk -F',' '{print $11}')
                     lte_rxlev_num=$(echo "$response" | awk -F',' '{print $12}')
                     lte_rxlev=$(get_rxlev "LTE" ${lte_rxlev_num})
                     lte_rsrp_num=$(echo "$response" | awk -F',' '{print $13}')
@@ -1491,7 +1491,7 @@ sim_switch_capabilities(){
 get_sim_slot(){
     local at_command="AT+GTDUALSIM?"
 	local expect_response="+GTDUALSIM"
-    response=$(at $at_port $at_command |grep $expect_response)
+    response=$(at $at_port $at_command |grep -a $expect_response)
     case $platform in
         "qualcomm")
             sim_slot=$(echo "$response" | awk -F': ' '{print $2}' | awk -F',' '{print $1}' | tr -d '\r')
